@@ -1,2 +1,3 @@
 duckdb-swift/Sources/Cduckdb/
-duckdb-swift/Package.swift
+duckdb-swift/Package.*
+duckdb-swift/Derived
