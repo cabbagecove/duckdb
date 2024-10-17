@@ -494,7 +494,7 @@ ExtensionLoadResult ExtensionHelper::LoadExtensionInternal(DuckDB &db, const std
 #endif
 	} else if (extension == "fts") {
 #if DUCKDB_EXTENSION_FTS_LINKED
-//		db.LoadStaticExtension<FtsExtension>();
+		db.LoadStaticExtension<FtsExtension>();
 #else
 		// fts extension required but not build: skip this test
 		return ExtensionLoadResult::NOT_LOADED;
