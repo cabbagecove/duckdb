@@ -92,12 +92,15 @@ public final class Connection: Sendable {
   /// - Throws: ``DatabaseError/connectionQueryError(reason:)`` if the query
   ///   did not execute successfully
   public func execute(_ sql: String) throws {
-    let status = sql.withCString { queryStrPtr in
-      duckdb_query(ptr.pointee, queryStrPtr, nil)
+    let resultPtr = UnsafeMutablePointer<duckdb_result>.allocate(capacity: 1)
+    let status = sql.withCString { [resultPtr] queryStrPtr in
+      duckdb_query(ptr.pointee, queryStrPtr, resultPtr)
     }
     guard status == .success else {
-      throw DatabaseError.connectionQueryError(reason: nil)
+      let error = duckdb_result_error(resultPtr).map(String.init(cString:))
+      throw DatabaseError.connectionQueryError(reason: error)
     }
+    resultPtr.deallocate()
   }
   
   func withCConnection<T>(_ body: (duckdb_connection?) throws -> T) rethrows -> T {
