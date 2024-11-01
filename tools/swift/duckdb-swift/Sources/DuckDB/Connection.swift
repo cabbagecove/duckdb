@@ -102,6 +102,10 @@ public final class Connection: Sendable {
     }
     resultPtr.deallocate()
   }
+    
+  public func cancel() {
+      duckdb_interrupt(ptr.pointee)
+  }
   
   func withCConnection<T>(_ body: (duckdb_connection?) throws -> T) rethrows -> T {
     try body(ptr.pointee)
