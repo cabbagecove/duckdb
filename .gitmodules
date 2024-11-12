@@ -1,4 +1,4 @@
 [submodule "duckdb-sqlite"]
 	path = extension/sqlite_scanner
 	url = git@github.com:duckdb/sqlite_scanner.git
-	branch = main
+	branch = cabbage
