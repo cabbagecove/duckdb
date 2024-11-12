@@ -5,7 +5,7 @@ from pathlib import Path
 from string import Template
 
 # list of extensions to bundle
-extensions = ['parquet', 'icu', 'json', 'fts', 'httpfs']
+extensions = ['parquet', 'icu', 'json', 'fts', 'httpfs', 'sqlite_scanner']
 
 # name of the repository
 repo_name = 'duckdb-swift'

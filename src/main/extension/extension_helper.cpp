@@ -52,6 +52,10 @@
 #define DUCKDB_EXTENSION_AUTOCOMPLETE_LINKED false
 #endif
 
+#ifndef DUCKDB_EXTENSION_SQLITE_SCANNER_LINKED
+#define DUCKDB_EXTENSION_SQLITE_SCANNER_LINKED false
+#endif
+
 // Load the generated header file containing our list of extension headers
 #if defined(GENERATED_EXTENSION_HEADERS) && GENERATED_EXTENSION_HEADERS && !defined(DUCKDB_AMALGAMATION)
 #include "duckdb/main/extension/generated_extension_loader.hpp"
@@ -93,6 +97,10 @@
 #if DUCKDB_EXTENSION_AUTOCOMPLETE_LINKED
 #include "autocomplete_extension.hpp"
 #endif
+
+#if DUCKDB_EXTENSION_SQLITE_SCANNER_LINKED
+#include "sqlite_scanner_extension.hpp"
+#endif
 #endif
 
 namespace duckdb {
@@ -113,7 +121,7 @@ static const DefaultExtension internal_extensions[] = {
     {"autocomplete", "Adds support for autocomplete in the shell", DUCKDB_EXTENSION_AUTOCOMPLETE_LINKED},
     {"motherduck", "Enables motherduck integration with the system", false},
     {"mysql_scanner", "Adds support for connecting to a MySQL database", false},
-    {"sqlite_scanner", "Adds support for reading and writing SQLite database files", false},
+    {"sqlite_scanner", "Adds support for reading and writing SQLite database files", DUCKDB_EXTENSION_SQLITE_SCANNER_LINKED},
     {"postgres_scanner", "Adds support for connecting to a Postgres database", false},
     {"inet", "Adds support for IP-related data types and functions", false},
     {"spatial", "Geospatial extension that adds support for working with spatial data and functions", false},
@@ -141,7 +149,7 @@ DefaultExtension ExtensionHelper::GetDefaultExtension(idx_t index) {
 //===--------------------------------------------------------------------===//
 // Allow Auto-Install Extensions
 //===--------------------------------------------------------------------===//
-static const char *const auto_install[] = {"motherduck", "postgres_scanner", "mysql_scanner", "sqlite_scanner",
+static const char *const auto_install[] = {"motherduck", "postgres_scanner", "mysql_scanner",
                                            nullptr};
 
 // TODO: unify with new autoload mechanism
@@ -404,7 +412,7 @@ void ExtensionHelper::LoadAllExtensions(DuckDB &db) {
 	// TODO: rewrite package_build.py to allow also loading out-of-tree extensions in non-cmake builds, after that
 	//		 these can be removed
 	unordered_set<string> extensions {"parquet", "icu",   "tpch", "tpcds",    "fts",         "httpfs",
-	                                  "json",    "excel", "inet", "jemalloc", "autocomplete"};
+	                                  "json",    "excel", "inet", "jemalloc", "autocomplete", "sqlite_scanner"};
 	for (auto &ext : extensions) {
 		LoadExtensionInternal(db, ext, true);
 	}
@@ -531,6 +539,13 @@ ExtensionLoadResult ExtensionHelper::LoadExtensionInternal(DuckDB &db, const std
 		db.LoadStaticExtension<AutocompleteExtension>();
 #else
 		// autocomplete extension required but not build: skip this test
+		return ExtensionLoadResult::NOT_LOADED;
+#endif
+	} else if (extension == "sqlite_scanner") {
+#if DUCKDB_EXTENSION_SQLITE_SCANNER_LINKED
+		db.LoadStaticExtension<SqliteScannerExtension>();
+#else
+		// sqlite_scanner extension required but not build: skip this test
 		return ExtensionLoadResult::NOT_LOADED;
 #endif
 	} else if (extension == "inet") {
