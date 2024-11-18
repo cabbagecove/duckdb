@@ -106,6 +106,14 @@ public final class Connection: Sendable {
   public func cancel() {
       duckdb_interrupt(ptr.pointee)
   }
+    
+  public func progress() -> Double? {
+      let progress = duckdb_query_progress(ptr.pointee)
+      if progress.total_rows_to_process > 0 && progress.percentage >= 0 {
+          return progress.percentage
+      }
+      return nil
+  }
   
   func withCConnection<T>(_ body: (duckdb_connection?) throws -> T) rethrows -> T {
     try body(ptr.pointee)
